@@ -11,7 +11,6 @@ case "${1}" in
     exportfs -ra
     systemctl restart dnsmasq
     systemctl restart rpcbind
-    systemctl restart nfs-common
     systemctl restart nfs-kernel-server
     ;;
 esac

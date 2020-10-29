@@ -1,0 +1,3 @@
+rm -r /etc/sage-utils/dns/
+rm /etc/exports
+rm /etc/dnsmasq.conf
