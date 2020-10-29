@@ -1,5 +1,3 @@
-# Beekeeper Registration
+# DHCP-PxeBoot-Service
 
-Services running on the end-points that register with beekeeper and then
-establish a reverse SSH tunnel to beekeeper based on the credentials returned
-from that registration.
+Creates Debian Package that set's up DHCP, NFS, and TFTP service on NX to allow for PXE booting a RPI4. Build's out RPI rootfs and boot files inside package. All together the package is 300MB.
