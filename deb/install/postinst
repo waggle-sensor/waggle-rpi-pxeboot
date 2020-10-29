@@ -1,0 +1,17 @@
+#!/bin/bash
+
+case "${1}" in
+  configure)
+    echo "Enabling & starting DHCP and PXE boot services"
+    
+    echo "/etc/sage-utils/dns/nfs *(rw,fsid=0,no_subtree_check,no_auth_nlm,insecure,no_root_squash)" >> /etc/exports
+
+    cp /etc/sage-utils/dns/dnsmasq.conf /etc/dnsmasq.conf
+
+    exportfs -ra
+    systemctl restart dnsmasq
+    systemctl restart rpcbind
+    systemctl restart nfs-common
+    systemctl restart nfs-kernel-server
+    ;;
+esac
