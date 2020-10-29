@@ -34,8 +34,13 @@ cp -p ROOTFS/etc/sage-utils/dns/* ${BASEDIR}/etc/sage-utils/dns/
 cp -pr bootmnt/* ${BASEDIR}/etc/sage-utils/dns/tftp/
 cp -pr rootmnt/* ${BASEDIR}/etc/sage-utils/dns/nfs/
 
+#modify boot fs
 echo "console=serial0,115200 console=tty1 root=/dev/nfs nfsroot=1.1.1.1:/etc/sage-utils/dns/nfs,vers=3 rw ip=dhcp rootwait elevator=deadline" > ${BASEDIR}/etc/sage-utils/dns/tftp/cmdline.txt
+
+#modify rootfs
 touch ${BASEDIR}/etc/sage-utils/dns/nfs/ssh
+echo "proc       /proc        proc     defaults    0    0"   > ${BASEDIR}/etc/sage-utils/dns/nfs/etc/fstab
+echo "1.1.1.1:/etc/sage-utils/dns/tftp /boot nfs defaults,vers=3 0 0" >> ${BASEDIR}/etc/sage-utils/dns/nfs/etc/fstab
 
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION}_${ARCH}.deb"
 mv *.deb /output/
