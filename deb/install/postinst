@@ -4,8 +4,10 @@ case "${1}" in
   configure)
     echo "Enabling & starting DHCP and PXE boot services"
     
+    cp /etc/exports /etc/exports.old
     echo "/etc/sage-utils/dns/nfs *(rw,fsid=0,no_subtree_check,no_auth_nlm,insecure,no_root_squash)" >> /etc/exports
-
+	
+    cp /etc/dnsmasq.conf /etc/dnsmasq.conf.old
     cp /etc/sage-utils/dns/dnsmasq.conf /etc/dnsmasq.conf
 
     exportfs -ra
