@@ -31,17 +31,11 @@ cp -p deb/install/prerm ${BASEDIR}/DEBIAN/
 mkdir -p ${BASEDIR}/etc/sage-utils/dns/tftp
 mkdir -p ${BASEDIR}/etc/sage-utils/dns/nfs
 
-cp -p ROOTFS/etc/sage-utils/dns/* ${BASEDIR}/etc/sage-utils/dns/
 cp -pr bootmnt/* ${BASEDIR}/etc/sage-utils/dns/tftp/
 cp -pr rootmnt/* ${BASEDIR}/etc/sage-utils/dns/nfs/
+cp -pr ROOTFS/etc/sage-utils/dns/* ${BASEDIR}/etc/sage-utils/dns/
 
-#modify boot fs
-echo "console=serial0,115200 console=tty1 root=/dev/nfs nfsroot=10.31.81.1:/etc/sage-utils/dns/nfs,vers=3 rw ip=dhcp rootwait elevator=deadline" > ${BASEDIR}/etc/sage-utils/dns/tftp/cmdline.txt
-
-#modify rootfs
-touch ${BASEDIR}/etc/sage-utils/dns/nfs/boot/ssh
-echo "proc       /proc        proc     defaults    0    0"   > ${BASEDIR}/etc/sage-utils/dns/nfs/etc/fstab
-echo "10.31.81.1:/etc/sage-utils/dns/tftp /boot nfs defaults,vers=3 0 0" >> ${BASEDIR}/etc/sage-utils/dns/nfs/etc/fstab
+echo "${VERSION}" > ${BASEDIR}/etc/sage-utils/dns/version
 
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION}_${ARCH}.deb"
 mv *.deb /output/

@@ -5,3 +5,7 @@ mv /etc/exports.old /etc/exports
 
 rm /etc/dnsmasq.conf
 mv /etc/dnsmasq.conf.old /etc/dnsmasq.conf
+
+systemctl stop dnsmasq
+systemctl stop rpcbind
+systemctl stop nfs-kernel-server
