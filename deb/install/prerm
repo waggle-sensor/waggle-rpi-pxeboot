@@ -7,6 +7,6 @@ rm /etc/dnsmasq.conf
 mv /etc/dnsmasq.conf.old /etc/dnsmasq.conf
 
 exportfs -ra
-systemctl restart dnsmasq
-systemctl restart rpcbind
-systemctl restart nfs-kernel-server
+systemctl restart dnsmasq || true
+systemctl restart rpcbind || true
+systemctl restart nfs-kernel-server || true

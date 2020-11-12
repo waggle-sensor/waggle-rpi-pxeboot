@@ -1,5 +1,30 @@
 #!/bin/bash -e
 
+function cleanup()
+{
+   echo "Checking if loopback device needs cleanup."
+   if [ -z "$NEWDEVICE" ]; then
+        echo "Manual cleanup of loopback devices neccessary."
+	return -1
+   fi
+	
+   echo "NEWDEVICE set @ $NEWDEVICE. Proceeding with cleanup!"
+   #free loopback devices
+   losetup -d $NEWDEVICE
+
+   umount bootmnt/
+   umount rootmnt/
+
+   loopDev1=$(echo ${NEWDEVICE:5}p1) 
+   loopDev2=$(echo ${NEWDEVICE:5}p2)
+   dmsetup remove $loopDev1
+   dmsetup remove $loopDev2
+   echo "Cleanup complete!"
+}
+
+trap cleanup EXIT SIGINT
+
+echo "Mounting RPI Filesystem"
 #determine currently used loopback devices
 losetup --output NAME > loopbackdevs 
 
@@ -35,6 +60,7 @@ Priority: optional
 Pre-Depends: nfs-kernel-server, dnsmasq
 EOL
 
+echo "Copying Over RPI Filesystem and DHCP/NFS config files"
 cp -p deb/install/postinst ${BASEDIR}/DEBIAN/
 cp -p deb/install/prerm ${BASEDIR}/DEBIAN/
 
@@ -46,17 +72,7 @@ cp -pr rootmnt/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/nfs/
 cp -pr ROOTFS/etc/sage-utils/dhcp-pxe/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/
 
 echo "${VERSION}" > ${BASEDIR}/etc/sage-utils/dhcp-pxe/version
+echo "Done Copying RPI Filesystem and DHCP/NFS config files"
 
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION}_${ARCH}.deb"
 mv *.deb /output/
-
-#free loopback devices
-losetup -d $NEWDEVICE
-
-umount bootmnt/
-umount rootmnt/
-
-loopDev1=$(echo ${NEWDEVICE:5}p1) 
-loopDev2=$(echo ${NEWDEVICE:5}p2)
-dmsetup remove $loopDev1  
-dmsetup remove $loopDev2
