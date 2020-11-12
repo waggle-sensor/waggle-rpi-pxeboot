@@ -1,2 +1,0 @@
-proc       /proc        proc     defaults    0    0
-10.31.81.1:/etc/sage-utils/dns/tftp /boot nfs defaults,vers=3 0 0

@@ -1,4 +1,4 @@
-rm -r /etc/sage-utils/dns/
+rm -r /etc/sage-utils/dhcp-pxe/
 
 rm /etc/exports
 mv /etc/exports.old /etc/exports
@@ -6,6 +6,7 @@ mv /etc/exports.old /etc/exports
 rm /etc/dnsmasq.conf
 mv /etc/dnsmasq.conf.old /etc/dnsmasq.conf
 
-systemctl stop dnsmasq
-systemctl stop rpcbind
-systemctl stop nfs-kernel-server
+exportfs -ra
+systemctl restart dnsmasq
+systemctl restart rpcbind
+systemctl restart nfs-kernel-server
