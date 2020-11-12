@@ -1,17 +1,52 @@
 #!/bin/bash -e
 
-losetup -D
-dmsetup remove_all
+function cleanup()
+{
+   echo "Checking if loopback device needs cleanup."
+   if [ -z "$NEWDEVICE" ]; then
+        echo "Manual cleanup of loopback devices neccessary."
+	return -1
+   fi
+	
+   echo "NEWDEVICE set @ $NEWDEVICE. Proceeding with cleanup!"
+   #free loopback devices
+   losetup -d $NEWDEVICE
+
+   umount bootmnt/
+   umount rootmnt/
+
+   loopDev1=$(echo ${NEWDEVICE:5}p1) 
+   loopDev2=$(echo ${NEWDEVICE:5}p2)
+   dmsetup remove $loopDev1
+   dmsetup remove $loopDev2
+   echo "Cleanup complete!"
+}
+
+trap cleanup EXIT SIGINT
+
+echo "Mounting RPI Filesystem"
+#determine currently used loopback devices
+losetup --output NAME > loopbackdevs 
+
 kpartx -a -v *.img
 mkdir {bootmnt,rootmnt}
-mount /dev/mapper/loop0p1 bootmnt/
-mount /dev/mapper/loop0p2 rootmnt/
+
+#determine which loopback device we just created
+losetup --output NAME > loopbackdevsAFTER
+NEWDEVICE=$(grep -v -F -x -f loopbackdevs loopbackdevsAFTER)
+
+#deterine paths to mount boot and root from (NEWDEVICE includes /dev/ path to device which is why we progress 5 characters)
+bootloc=$(echo /dev/mapper/${NEWDEVICE:5}p1)
+rootloc=$(echo /dev/mapper/${NEWDEVICE:5}p2)
+
+mount $bootloc bootmnt/
+mount $rootloc rootmnt/
 
 mkdir -p /tmp/reg
 
-# Build the registration debian package
+# Build the pxe-boot debian package
 BASEDIR=/tmp/reg
-NAME=sage-dns-nfs
+NAME=sage-rpi-pxeboot
 ARCH=all
 
 mkdir -p ${BASEDIR}/DEBIAN
@@ -25,23 +60,19 @@ Priority: optional
 Pre-Depends: nfs-kernel-server, dnsmasq
 EOL
 
+echo "Copying Over RPI Filesystem and DHCP/NFS config files"
 cp -p deb/install/postinst ${BASEDIR}/DEBIAN/
 cp -p deb/install/prerm ${BASEDIR}/DEBIAN/
 
-mkdir -p ${BASEDIR}/etc/sage-utils/dns/tftp
-mkdir -p ${BASEDIR}/etc/sage-utils/dns/nfs
+mkdir -p ${BASEDIR}/etc/sage-utils/dhcp-pxe/tftp
+mkdir -p ${BASEDIR}/etc/sage-utils/dhcp-pxe/nfs
 
-cp -p ROOTFS/etc/sage-utils/dns/* ${BASEDIR}/etc/sage-utils/dns/
-cp -pr bootmnt/* ${BASEDIR}/etc/sage-utils/dns/tftp/
-cp -pr rootmnt/* ${BASEDIR}/etc/sage-utils/dns/nfs/
+cp -pr bootmnt/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/tftp/
+cp -pr rootmnt/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/nfs/
+cp -pr ROOTFS/etc/sage-utils/dhcp-pxe/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/
 
-#modify boot fs
-echo "console=serial0,115200 console=tty1 root=/dev/nfs nfsroot=10.31.81.1:/etc/sage-utils/dns/nfs,vers=3 rw ip=dhcp rootwait elevator=deadline" > ${BASEDIR}/etc/sage-utils/dns/tftp/cmdline.txt
-
-#modify rootfs
-touch ${BASEDIR}/etc/sage-utils/dns/nfs/boot/ssh
-echo "proc       /proc        proc     defaults    0    0"   > ${BASEDIR}/etc/sage-utils/dns/nfs/etc/fstab
-echo "10.31.81.1:/etc/sage-utils/dns/tftp /boot nfs defaults,vers=3 0 0" >> ${BASEDIR}/etc/sage-utils/dns/nfs/etc/fstab
+echo "${VERSION}" > ${BASEDIR}/etc/sage-utils/dhcp-pxe/version
+echo "Done Copying RPI Filesystem and DHCP/NFS config files"
 
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION}_${ARCH}.deb"
 mv *.deb /output/

@@ -1,5 +1,4 @@
 #!/bin/bash -e
-# Build Docker Container -> Run It -> 
 
 # determine full version
 BASE_VERSION="$(cat 'version' | xargs).${BUILD_NUMBER:-local}"

@@ -1,7 +1,12 @@
-rm -r /etc/sage-utils/dns/
+rm -r /etc/sage-utils/dhcp-pxe/
 
 rm /etc/exports
 mv /etc/exports.old /etc/exports
 
 rm /etc/dnsmasq.conf
 mv /etc/dnsmasq.conf.old /etc/dnsmasq.conf
+
+exportfs -ra
+systemctl restart dnsmasq || true
+systemctl restart rpcbind || true
+systemctl restart nfs-kernel-server || true
