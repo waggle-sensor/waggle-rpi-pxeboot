@@ -15,8 +15,8 @@ function cleanup()
    umount bootmnt/
    umount rootmnt/
 
-   loopDev1=$(echo ${NEWDEVICE:5}p1) 
-   loopDev2=$(echo ${NEWDEVICE:5}p2)
+   loopDev1=$(echo $(basename ${NEWDEVICE})p1)
+   loopDev2=$(echo $(basename ${NEWDEVICE})p2)
    dmsetup remove $loopDev1
    dmsetup remove $loopDev2
    echo "Cleanup complete!"
@@ -26,18 +26,18 @@ trap cleanup EXIT SIGINT
 
 echo "Mounting RPI Filesystem"
 #determine currently used loopback devices
-losetup --output NAME > loopbackdevs 
+losetup --output NAME -n > loopbackdevs 
 
 kpartx -a -v *.img
 mkdir {bootmnt,rootmnt}
 
 #determine which loopback device we just created
-losetup --output NAME > loopbackdevsAFTER
-NEWDEVICE=$(grep -v -F -x -f loopbackdevs loopbackdevsAFTER)
+losetup --output NAME -n > loopbackdevsAFTER
+NEWDEVICE=$(comm -13 loopbackdevs loopbackdevsAFTER)
 
 #deterine paths to mount boot and root from (NEWDEVICE includes /dev/ path to device which is why we progress 5 characters)
-bootloc=$(echo /dev/mapper/${NEWDEVICE:5}p1)
-rootloc=$(echo /dev/mapper/${NEWDEVICE:5}p2)
+bootloc=$(echo /dev/mapper/$(basename ${NEWDEVICE})p1)
+rootloc=$(echo /dev/mapper/$(basename ${NEWDEVICE})p2)
 
 mount $bootloc bootmnt/
 mount $rootloc rootmnt/

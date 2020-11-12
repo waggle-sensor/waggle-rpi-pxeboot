@@ -8,7 +8,7 @@ case "${1}" in
     echo "/etc/sage-utils/dhcp-pxe/nfs *(rw,fsid=0,no_subtree_check,no_auth_nlm,insecure,no_root_squash)" >> /etc/exports
 	
     cp /etc/dnsmasq.conf /etc/dnsmasq.conf.old
-    cp /etc/sage-utils/dns/dnsmasq.conf /etc/dnsmasq.conf
+    cp /etc/sage-utils/dhcp-pxe/dnsmasq.conf /etc/dnsmasq.conf
 
     exportfs -ra
     systemctl restart dnsmasq
