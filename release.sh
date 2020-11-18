@@ -33,7 +33,7 @@ mkdir {bootmnt,rootmnt}
 
 #determine which loopback device we just created
 losetup --output NAME -n > loopbackdevsAFTER
-NEWDEVICE=$(comm -13 loopbackdevs loopbackdevsAFTER)
+NEWDEVICE=$(grep -v -F -x -f loopbackdevs loopbackdevsAFTER)
 
 #deterine paths to mount boot and root from (NEWDEVICE includes /dev/ path to device which is why we progress 5 characters)
 bootloc=$(echo /dev/mapper/$(basename ${NEWDEVICE})p1)
