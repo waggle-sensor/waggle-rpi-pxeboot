@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+#initializes sd card on rpi
+
+SDDIR="/dev/mmcblk0"
+SDPARTDIR="/dev/mmcblk0p1"
+
+if [ -b "$SDDIR" ]; then
+  echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` > /etc/rc.local.logs
+  mkdir -p /media/scratch/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+  if [ ! -b "$SDPARTDIR" ]; then
+        echo "Initializing Partition Table on SD Card" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+        sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << FDISK_CMDS | fdisk /dev/mmcblk0
+                o # clear the in memory partition table
+                g #initialize got partition table
+                n # new partition
+                1 # partition number 1
+                # default - start at beginning of disk
+                # default - finish at end of disk
+                w # write the partition table
+                q # and we're done
+FDISK_CMDS
+
+        mkfs -t ext4 /dev/mmcblk0p1 >> /etc/rc.local.logs
+  fi
+
+  echo "Mounting SD CARD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+  mount /dev/mmcblk0p1 /media/scratch | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+  cat /etc/rc.local.logs >> /media/scratch/sdmount.log
+
+else
+  echo "Error: SD CARD not found will continue without SD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+fi
