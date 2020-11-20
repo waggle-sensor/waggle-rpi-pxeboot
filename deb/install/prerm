@@ -1,3 +1,5 @@
+#!/bin/bash
+
 rm -r /etc/sage-utils/dhcp-pxe/
 
 rm /etc/exports
