@@ -31,3 +31,7 @@ FDISK_CMDS
 else
   echo "Error: SD CARD not found will continue without SD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 fi
+
+#Removing PI user and updating ROOT Password
+userdel -r -f pi | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+echo "'pi' user removed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
