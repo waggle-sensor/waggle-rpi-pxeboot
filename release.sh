@@ -64,14 +64,14 @@ echo "Copying Over RPI Filesystem and DHCP/NFS config files"
 cp -p deb/install/postinst ${BASEDIR}/DEBIAN/
 cp -p deb/install/prerm ${BASEDIR}/DEBIAN/
 
-mkdir -p ${BASEDIR}/etc/sage-utils/dhcp-pxe/tftp
-mkdir -p ${BASEDIR}/etc/sage-utils/dhcp-pxe/nfs
+mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp
+mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs
 
-cp -pr bootmnt/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/tftp/
-cp -pr rootmnt/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/nfs/
-cp -pr ROOTFS/etc/sage-utils/dhcp-pxe/* ${BASEDIR}/etc/sage-utils/dhcp-pxe/
+cp -pr bootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/
+cp -pr rootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/
+cp -pr ROOTFS/media/rpi/sage-utils/dhcp-pxe/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/
 
-echo "${VERSION}" > ${BASEDIR}/etc/sage-utils/dhcp-pxe/version
+echo "${VERSION}" > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/version
 echo "Done Copying RPI Filesystem and DHCP/NFS config files"
 
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION}_${ARCH}.deb"
