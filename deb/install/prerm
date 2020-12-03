@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -r /etc/sage-utils/dhcp-pxe/
+rm -r /media/rpi/sage-utils/dhcp-pxe/
 
 rm /etc/exports
 mv /etc/exports.old /etc/exports

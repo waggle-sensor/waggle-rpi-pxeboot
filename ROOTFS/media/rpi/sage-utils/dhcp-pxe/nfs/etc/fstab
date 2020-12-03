@@ -1,0 +1,1 @@
+10.31.81.1:/media/rpi/sage-utils/dhcp-pxe/tftp /boot nfs defaults,vers=3 0 0
