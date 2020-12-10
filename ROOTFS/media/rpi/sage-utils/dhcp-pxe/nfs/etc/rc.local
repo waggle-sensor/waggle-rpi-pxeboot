@@ -35,3 +35,7 @@ fi
 #Removing PI user and updating ROOT Password
 userdel -r -f pi | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 echo "'pi' user removed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+
+#Installing all packages from /isodebs/
+dpkg -i /isodebs/*
+echo "Packages In /isodebs/ Installed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
