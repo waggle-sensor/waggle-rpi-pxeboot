@@ -7,7 +7,7 @@ SDPARTDIR="/dev/mmcblk0p1"
 
 if [ -b "$SDDIR" ]; then
   echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` > /etc/rc.local.logs
-  mkdir -p /media/scratch/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+  mkdir -p /media/plugin-data/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   if [ ! -b "$SDPARTDIR" ]; then
         echo "Initializing Partition Table on SD Card" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
         sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << FDISK_CMDS | fdisk /dev/mmcblk0
@@ -25,17 +25,19 @@ FDISK_CMDS
   fi
 
   echo "Mounting SD CARD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-  mount /dev/mmcblk0p1 /media/scratch | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-  cat /etc/rc.local.logs >> /media/scratch/sdmount.log
+  mount /dev/mmcblk0p1 /media/plugin-data | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+  cat /etc/rc.local.logs >> /media/plugin-data/sdmount.log
 
 else
   echo "Error: SD CARD not found will continue without SD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 fi
 
-#Removing PI user and updating ROOT Password
-userdel -r -f pi | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-echo "'pi' user removed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-
 #Installing all packages from /isodebs/
 dpkg -i /isodebs/*
 echo "Packages In /isodebs/ Installed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+
+mkdir -p /media/plugin-data/k3s/kubelet
+mkdir -p /media/plugin-data/k3s/rancher
+ln -s /media/plugin-data/k3s/kubelet/ /var/lib/kubelet
+ln -s /media/plugin-data/k3s/rancher/ /var/lib/rancher
+INSTALL_K3S_SKIP_DOWNLOAD=true /etc/installK3S.sh

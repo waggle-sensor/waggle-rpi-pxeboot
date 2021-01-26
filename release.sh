@@ -69,7 +69,12 @@ mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs
 
 cp -pr bootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/
 cp -pr rootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/
-cp -pr ROOTFS/media/rpi/sage-utils/dhcp-pxe/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/
+cp -pr ROOTFS/media/rpi/sage-utils/dhcp-pxe/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe
+zcat ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinuz > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinux
+
+wget https://github.com/rancher/k3s/releases/download/v1.20.0+k3s2/k3s-arm64
+chmod +x k3s-arm64
+mv k3s-arm64 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/usr/local/bin/k3s
 
 echo "${VERSION}" > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/version
 echo "Done Copying RPI Filesystem and DHCP/NFS config files"
