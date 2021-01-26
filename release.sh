@@ -64,8 +64,8 @@ echo "Copying Over RPI Filesystem and DHCP/NFS config files"
 cp -p deb/install/postinst ${BASEDIR}/DEBIAN/
 cp -p deb/install/prerm ${BASEDIR}/DEBIAN/
 
-mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp
-mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs
+mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/
+mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/
 
 cp -pr bootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/
 cp -pr rootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/

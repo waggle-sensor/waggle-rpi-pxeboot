@@ -11,7 +11,8 @@ RUN apt-get update -y && apt-get install -y \
     kpartx \
     wget \
     zip  \
-    xz-utils
+    xz-utils \
+    rsync
 
 RUN wget https://cdimage.ubuntu.com/releases/20.04.1/release/ubuntu-20.04.1-preinstalled-server-arm64+raspi.img.xz
 RUN unxz *.xz

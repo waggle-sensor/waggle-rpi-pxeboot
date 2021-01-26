@@ -1,5 +1,3 @@
-#!/bin/bash -e
-
 # determine full version
 BASE_VERSION="$(cat 'version' | xargs).${BUILD_NUMBER:-local}"
 GIT_SHA=$(git rev-parse --short HEAD)
@@ -11,4 +9,4 @@ REQ_PACKAGES=$(sed -e '/^#/d' required_deb_packages.txt | tr '\n' ' ')
 
 docker build --build-arg REQ_PACKAGES="${REQ_PACKAGES}" -t pi_build .
 docker run --rm --privileged \
--v `pwd`:/output/ -e VERSION=$VERSION pi_build ./release.sh  
+-v `pwd`:/output/ -e VERSION=$VERSION pi_build ./release.sh 
