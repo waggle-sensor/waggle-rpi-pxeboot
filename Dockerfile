@@ -1,4 +1,11 @@
-FROM arm64v8/ubuntu as deb_container
+# define the container to get the qemu binaries
+FROM amd64/ubuntu:focal as qemu_src
+# download the qemu static binaries
+RUN apt-get update && apt-get install --no-install-recommends -y qemu-user-static
+
+FROM arm64v8/ubuntu:focal-20210119 as deb_container
+# add support for transparent cross architecture builds
+COPY --from=qemu_src /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
 # Download all the required debian packages for inclusion in the ISO
 ARG REQ_PACKAGES
@@ -11,8 +18,7 @@ RUN apt-get update -y && apt-get install -y \
     kpartx \
     wget \
     zip  \
-    xz-utils \
-    rsync
+    xz-utils
 
 RUN wget https://cdimage.ubuntu.com/releases/20.04.1/release/ubuntu-20.04.1-preinstalled-server-arm64+raspi.img.xz
 RUN unxz *.xz
