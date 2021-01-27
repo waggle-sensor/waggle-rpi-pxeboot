@@ -1,5 +1,5 @@
 # define the container to get the qemu binaries
-FROM amd64/ubuntu:bionic-20200921 as qemu_src
+FROM amd64/ubuntu:focal-20210119 as qemu_src
 # download the qemu static binaries
 RUN apt-get update && apt-get install --no-install-recommends -y qemu-user-static
 
