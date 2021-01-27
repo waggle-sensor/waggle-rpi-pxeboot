@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: CI
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup environment
+      run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    - name: run tests and coverage
+      run: ./build.sh
