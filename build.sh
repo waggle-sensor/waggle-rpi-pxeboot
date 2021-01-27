@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 # determine full version
 BASE_VERSION="$(cat 'version' | xargs).${BUILD_NUMBER:-local}"
 GIT_SHA=$(git rev-parse --short HEAD)
