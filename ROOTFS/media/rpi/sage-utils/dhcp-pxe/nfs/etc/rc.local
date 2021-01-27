@@ -40,4 +40,4 @@ mkdir -p /media/plugin-data/k3s/kubelet
 mkdir -p /media/plugin-data/k3s/rancher
 ln -s /media/plugin-data/k3s/kubelet/ /var/lib/kubelet
 ln -s /media/plugin-data/k3s/rancher/ /var/lib/rancher
-INSTALL_K3S_SKIP_DOWNLOAD=true /etc/installK3S.sh >> /etc/rc.local.logs
+INSTALL_K3S_SKIP_DOWNLOAD=true /etc/installK3S.sh | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
