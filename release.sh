@@ -79,5 +79,9 @@ mv k3s-arm64 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/usr/local/bin/k3s
 echo "${VERSION}" > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/version
 echo "Done Copying RPI Filesystem and DHCP/NFS config files"
 
+pushd ${BASEDIR}
+find * -type f -not -path 'DEBIAN/*' -exec md5sum {} \; > DEBIAN/md5sums
+popd
+
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION}_${ARCH}.deb"
 mv *.deb /output/
