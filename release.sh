@@ -7,7 +7,7 @@ function cleanup()
         echo "Manual cleanup of loopback devices neccessary."
 	return -1
    fi
-	
+
    echo "NEWDEVICE set @ $NEWDEVICE. Proceeding with cleanup!"
    #free loopback devices
    losetup -d $NEWDEVICE
@@ -26,7 +26,7 @@ trap cleanup EXIT SIGINT
 
 echo "Mounting RPI Filesystem"
 #determine currently used loopback devices
-losetup --output NAME -n > loopbackdevs 
+losetup --output NAME -n > loopbackdevs
 
 kpartx -a -v *.img
 mkdir {bootmnt,rootmnt}
@@ -67,8 +67,8 @@ cp -p deb/install/prerm ${BASEDIR}/DEBIAN/
 mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/
 mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/
 
-cp -pr bootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/
-cp -pr rootmnt/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/
+rsync -axHAWX --numeric-ids --verbose bootmnt/ ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp
+rsync -axHAWX --numeric-ids --verbose rootmnt/ ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs
 cp -pr ROOTFS/media/rpi/sage-utils/dhcp-pxe/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe
 zcat ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinuz > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinux
 
