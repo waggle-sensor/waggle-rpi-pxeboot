@@ -12,8 +12,9 @@ if [ -b "$SDDIR" ]; then
         echo "Initializing Partition Table on SD Card" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
         sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << FDISK_CMDS | fdisk /dev/mmcblk0
                 n # new partition
-                3 # partition number 3
-                # default - start at beginning of disk
+                p # primary partition
+		3 # partition number 3
+                3637248 # default - start at beginning of free space of disk (after pi os)
                 # default - finish at end of disk
                 w # write the partition table
                 q # and we're done
