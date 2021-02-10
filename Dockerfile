@@ -21,7 +21,7 @@ RUN apt-get update -y && apt-get install -y \
     xz-utils \
     rsync
 
-RUN wget https://cdimage.ubuntu.com/releases/20.04.1/release/ubuntu-20.04.1-preinstalled-server-arm64+raspi.img.xz
+RUN wget https://cdimage.ubuntu.com/releases/20.04.1/release/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img.xz
 RUN unxz --test *.xz
 RUN unxz --verbose *.xz
 
