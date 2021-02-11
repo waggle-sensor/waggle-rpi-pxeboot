@@ -13,4 +13,4 @@ jobs:
     - name: setup environment
       run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     - name: run tests and coverage
-      run: ./build.sh
+      run: ./build.sh -f
