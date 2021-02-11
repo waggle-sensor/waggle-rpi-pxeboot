@@ -10,11 +10,15 @@ if [ -b "$SDDIR" ]; then
   mkdir -p /media/plugin-data/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   if [ ! -b "$SDPARTDIR" ]; then
         echo "Initializing Partition Table on SD Card" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-        sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << FDISK_CMDS | fdisk /dev/mmcblk0
+        sectors=$(sudo fdisk -l | grep ^/dev/mmcblk0 |  awk -F" "  '{ print $3 }')
+	end_sector=$(echo $sectors | cut -d' ' -f2)
+	start_sector=$(expr $end_sector + 1)
+
+	sed -e 's/\s*\([\+0-9a-zA-Z]*\).*/\1/' << FDISK_CMDS | fdisk /dev/mmcblk0
                 n # new partition
                 p # primary partition
 		3 # partition number 3
-                3637248 # default - start at beginning of free space of disk (after pi os)
+                $start_sector # default - start at beginning of free space of disk (after pi os)
                 # default - finish at end of disk
                 w # write the partition table
                 q # and we're done
@@ -22,7 +26,10 @@ FDISK_CMDS
 
         mkfs -t ext4 /dev/mmcblk0p3 >> /etc/rc.local.logs
   fi
-
+  
+  echo "Preforming check on 3rd partition on SD" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+  fsck -a /dev/mmcblk0p3 | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+ 
   echo "Mounting SD CARD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   mount /dev/mmcblk0p3 /media/plugin-data | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   cat /etc/rc.local.logs >> /media/plugin-data/sdmount.log
