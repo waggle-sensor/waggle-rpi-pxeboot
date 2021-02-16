@@ -7,9 +7,6 @@ case "${1}" in
     cp /etc/exports /etc/exports.old
     echo "/media/rpi/sage-utils/dhcp-pxe/nfs *(rw,fsid=0,no_subtree_check,no_auth_nlm,insecure,no_root_squash)" >> /etc/exports
 
-    cp /etc/dnsmasq.conf /etc/dnsmasq.conf.old
-    cp /media/rpi/sage-utils/dhcp-pxe/dnsmasq.conf /etc/dnsmasq.conf
-
     exportfs -ra
     systemctl restart dnsmasq || true
     systemctl restart rpcbind || true
