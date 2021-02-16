@@ -69,7 +69,7 @@ mkdir -p ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/
 
 rsync -axHAWX --numeric-ids --verbose bootmnt/ ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp
 rsync -axHAWX --numeric-ids --verbose rootmnt/ ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs
-cp -pr ROOTFS/media/rpi/sage-utils/dhcp-pxe/* ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe
+cp -pr ROOTFS/* ${BASEDIR}/
 zcat ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinuz > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinux
 
 wget https://github.com/rancher/k3s/releases/download/v1.20.2+k3s1/k3s-arm64
