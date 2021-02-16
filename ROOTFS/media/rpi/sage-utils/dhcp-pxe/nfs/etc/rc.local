@@ -49,6 +49,7 @@ echo "Packages In /isodebs/ Installed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M
 MACLower=$(sed s/://g /sys/class/net/eth0/address)
 MAC=${MACLower^^}
 MACFULL=$(printf "0000%5s\n" "$MAC")
+hostname=$(cat /etc/hostname)
 
 mkdir -p /media/plugin-data/k3s/kubelet
 mkdir -p /media/plugin-data/k3s/rancher
