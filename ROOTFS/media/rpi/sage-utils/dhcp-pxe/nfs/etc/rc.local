@@ -38,10 +38,6 @@ else
   echo "Error: SD CARD not found will continue without SD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 fi
 
-echo "Initialzing DNS Nameservers" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-rm /etc/resolv.conf
-printf "nameserver 8.8.8.8\nnameserver 8.8.4.4" > /etc/resolv.conf
-
 #Installing all packages from /isodebs/
 dpkg -i /isodebs/*
 echo "Packages In /isodebs/ Installed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
