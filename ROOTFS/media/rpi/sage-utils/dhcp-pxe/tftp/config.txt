@@ -27,3 +27,4 @@ disable_overscan=1
 # If you have a CM4, uncomment the following line to enable the USB2 outputs
 # on the IO board (assuming your CM4 is plugged into such a board)
 #dtoverlay=dwc2,dr_mode=host
+dtoverlay=bme680-overlay
