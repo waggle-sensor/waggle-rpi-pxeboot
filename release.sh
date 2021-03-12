@@ -75,6 +75,7 @@ rm ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/resolv.conf
 cp -pr ROOTFS/* ${BASEDIR}/
 zcat ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinuz > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinux
 
+chmod 755 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/overlays/bme680-overlay.dtbo
 chmod 600 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/ssh/ssh_host_ecdsa_key
 
 wget https://github.com/rancher/k3s/releases/download/v1.20.2+k3s1/k3s-arm64

@@ -1,0 +1,13 @@
+/dts-v1/;
+/plugin/;
+
+&i2c1 {
+  status = "okay";
+  #address-cells = <1>;
+  #size-cells = <0>;
+
+  bme680@76 {
+    compatible = "bosch,bme680";
+    reg = <0x76>;
+  };
+};
