@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+set -o noglob
 
 # Usage:
 #   curl ... | ENV_VAR=... sh -
@@ -21,6 +22,9 @@ set -e
 #
 #   - INSTALL_K3S_SKIP_DOWNLOAD
 #     If set to true will not download k3s hash or binary.
+#
+#   - INSTALL_K3S_FORCE_RESTART
+#     If set to true will always restart the K3s service
 #
 #   - INSTALL_K3S_SYMLINK
 #     If set to 'skip' will not create symlinks, 'force' will overwrite,
@@ -87,7 +91,7 @@ set -e
 #     Channel to use for fetching k3s download URL.
 #     Defaults to 'stable'.
 
-GITHUB_URL=https://github.com/rancher/k3s/releases
+GITHUB_URL=https://github.com/k3s-io/k3s/releases
 STORAGE_URL=https://storage.googleapis.com/k3s-ci-builds
 DOWNLOADER=
 
@@ -112,7 +116,7 @@ verify_system() {
         HAS_OPENRC=true
         return
     fi
-    if [ -d /run/systemd ]; then
+    if [ -x /bin/systemctl ] || type systemctl > /dev/null 2>&1; then
         HAS_SYSTEMD=true
         return
     fi
@@ -316,7 +320,7 @@ setup_verify_arch() {
 # --- verify existence of network downloader executable ---
 verify_downloader() {
     # Return failure if it doesn't exist or is no executable
-    [ -x "$(which $1)" ] || return 1
+    [ -x "$(command -v $1)" ] || return 1
 
     # Set verified executable as our downloader program and return success
     DOWNLOADER=$1
@@ -438,7 +442,7 @@ setup_binary() {
 
 # --- setup selinux policy ---
 setup_selinux() {
-    case ${INSTALL_K3S_CHANNEL} in 
+    case ${INSTALL_K3S_CHANNEL} in
         *testing)
             rpm_channel=testing
             ;;
@@ -455,61 +459,93 @@ setup_selinux() {
         rpm_site="rpm-testing.rancher.io"
     fi
 
-    policy_hint="please install:
-    yum install -y container-selinux selinux-policy-base
-    yum install -y https://${rpm_site}/k3s/${rpm_channel}/common/centos/7/noarch/k3s-selinux-0.2-1.el7_8.noarch.rpm
-"
-    policy_error=fatal
-    if [ "$INSTALL_K3S_SELINUX_WARN" = true ] || grep -q 'ID=flatcar' /etc/os-release; then
-        policy_error=warn
+    [ -r /etc/os-release ] && . /etc/os-release
+    if [ "${ID_LIKE%%[ ]*}" = "suse" ]; then
+        rpm_target=sle
+        rpm_site_infix=microos
+        package_installer=zypper
+    elif [ "${VERSION_ID%%.*}" = "7" ]; then
+        rpm_target=el7
+        rpm_site_infix=centos/7
+        package_installer=yum
+    else
+        rpm_target=el8
+        rpm_site_infix=centos/8
+        package_installer=yum
     fi
 
-    if [ "$INSTALL_K3S_SKIP_SELINUX_RPM" = true ] || can_skip_download; then
+    if [ "${package_installer}" = "yum" ] && [ -x /usr/bin/dnf ]; then
+        package_installer=dnf
+    fi
+
+    policy_hint="please install:
+    ${package_installer} install -y container-selinux
+    ${package_installer} install -y https://${rpm_site}/k3s/${rpm_channel}/common/${rpm_site_infix}/noarch/k3s-selinux-0.4-1.${rpm_target}.noarch.rpm
+"
+
+    if [ "$INSTALL_K3S_SKIP_SELINUX_RPM" = true ] || can_skip_download || [ ! -d /usr/share/selinux ]; then
         info "Skipping installation of SELinux RPM"
-    else
-        install_selinux_rpm ${rpm_site} ${rpm_channel}
+    elif  [ "${ID_LIKE:-}" != coreos ] && [ "${VARIANT_ID:-}" != coreos ]; then
+        install_selinux_rpm ${rpm_site} ${rpm_channel} ${rpm_target} ${rpm_site_infix}
+    fi
+
+    policy_error=fatal
+    if [ "$INSTALL_K3S_SELINUX_WARN" = true ] || [ "${ID_LIKE:-}" = coreos ] || [ "${VARIANT_ID:-}" = coreos ]; then
+        policy_error=warn
     fi
 
     if ! $SUDO chcon -u system_u -r object_r -t container_runtime_exec_t ${BIN_DIR}/k3s >/dev/null 2>&1; then
         if $SUDO grep '^\s*SELINUX=enforcing' /etc/selinux/config >/dev/null 2>&1; then
             $policy_error "Failed to apply container_runtime_exec_t to ${BIN_DIR}/k3s, ${policy_hint}"
         fi
-    else
-        if [ ! -f /usr/share/selinux/packages/k3s.pp ]; then
+    elif [ ! -f /usr/share/selinux/packages/k3s.pp ]; then
+        if [ -x /usr/sbin/transactional-update ]; then
+            warn "Please reboot your machine to activate the changes and avoid data loss."
+        else
             $policy_error "Failed to find the k3s-selinux policy, ${policy_hint}"
         fi
     fi
 }
 
-# --- if on an el7/el8 system, install k3s-selinux
 install_selinux_rpm() {
-    if [ -r /etc/redhat-release ] || [ -r /etc/centos-release ] || [ -r /etc/oracle-release ]; then
-        dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
-        maj_ver=$(echo "$dist_version" | sed -E -e "s/^([0-9]+)\.?[0-9]*$/\1/")
-        if [ -r /etc/redhat-release ]; then
-            case ${maj_ver} in
-                7)
-                    $SUDO yum -y install yum-utils
-                    $SUDO yum-config-manager --enable rhel-7-server-extras-rpms
-                    ;;
-                8)
-                    :
-                    ;;
-                *)
-                    return
-                    ;;
-            esac
+    if [ -r /etc/redhat-release ] || [ -r /etc/centos-release ] || [ -r /etc/oracle-release ] || [ "${ID_LIKE%%[ ]*}" = "suse" ]; then
+        repodir=/etc/yum.repos.d
+        if [ -d /etc/zypp/repos.d ]; then
+            repodir=/etc/zypp/repos.d
         fi
-        $SUDO rm -f /etc/yum.repos.d/rancher-k3s-common*.repo
-        $SUDO tee /etc/yum.repos.d/rancher-k3s-common.repo >/dev/null << EOF
+        set +o noglob
+        $SUDO rm -f ${repodir}/rancher-k3s-common*.repo
+        set -o noglob
+        if [ -r /etc/redhat-release ] && [ "${3}" = "el7" ]; then
+            $SUDO yum install -y yum-utils
+            $SUDO yum-config-manager --enable rhel-7-server-extras-rpms
+        fi
+        $SUDO tee ${repodir}/rancher-k3s-common.repo >/dev/null << EOF
 [rancher-k3s-common-${2}]
 name=Rancher K3s Common (${2})
-baseurl=https://${1}/k3s/${2}/common/centos/${maj_ver}/noarch
+baseurl=https://${1}/k3s/${2}/common/${4}/noarch
 enabled=1
 gpgcheck=1
+repo_gpgcheck=0
 gpgkey=https://${1}/public.key
 EOF
-        $SUDO yum -y install "k3s-selinux"
+        case ${3} in
+        sle)
+            rpm_installer="zypper --gpg-auto-import-keys"
+            if [ "${TRANSACTIONAL_UPDATE=false}" != "true" ] && [ -x /usr/sbin/transactional-update ]; then
+                rpm_installer="transactional-update --no-selfupdate -d run ${rpm_installer}"
+                : "${INSTALL_K3S_SKIP_START:=true}"
+            fi
+            ;;
+        *)
+            rpm_installer="yum"
+            ;;
+        esac
+        if [ "${rpm_installer}" = "yum" ] && [ -x /usr/bin/dnf ]; then
+            rpm_installer=dnf
+        fi
+        # shellcheck disable=SC2086
+        $SUDO ${rpm_installer} install -y "k3s-selinux"
     fi
     return
 }
@@ -545,7 +581,7 @@ create_symlinks() {
 
     for cmd in kubectl crictl ctr; do
         if [ ! -e ${BIN_DIR}/${cmd} ] || [ "${INSTALL_K3S_SYMLINK}" = force ]; then
-            which_cmd=$(which ${cmd} 2>/dev/null || true)
+            which_cmd=$(command -v ${cmd} 2>/dev/null || true)
             if [ -z "${which_cmd}" ] || [ "${INSTALL_K3S_SYMLINK}" = force ]; then
                 info "Creating ${BIN_DIR}/${cmd} symlink to k3s"
                 $SUDO ln -sf k3s ${BIN_DIR}/${cmd}
@@ -611,12 +647,17 @@ getshims() {
 killtree $({ set +x; } 2>/dev/null; getshims; set -x)
 
 do_unmount_and_remove() {
-    awk -v path="$1" '$2 ~ ("^" path) { print $2 }' /proc/self/mounts | sort -r | xargs -r -t -n 1 sh -c 'umount "$0" && rm -rf "$0"'
+    set +x
+    while read -r _ path _; do
+        case "$path" in $1*) echo "$path" ;; esac
+    done < /proc/self/mounts | sort -r | xargs -r -t -n 1 sh -c 'umount "$0" && rm -rf "$0"'
+    set -x
 }
 
 do_unmount_and_remove '/run/k3s'
 do_unmount_and_remove '/var/lib/rancher/k3s'
 do_unmount_and_remove '/var/lib/kubelet/pods'
+do_unmount_and_remove '/var/lib/kubelet/plugins'
 do_unmount_and_remove '/run/netns/cni-'
 
 # Remove CNI namespaces
@@ -629,8 +670,10 @@ ip link show 2>/dev/null | grep 'master cni0' | while read ignore iface ignore; 
 done
 ip link delete cni0
 ip link delete flannel.1
+ip link delete flannel-v6.1
 rm -rf /var/lib/cni/
-iptables-save | grep -v KUBE- | grep -v CNI- | iptables-restore
+iptables-save | grep -v KUBE- | grep -v CNI- | grep -v flannel | iptables-restore
+ip6tables-save | grep -v KUBE- | grep -v CNI- | grep -v flannel | ip6tables-restore
 EOF
     $SUDO chmod 755 ${KILLALL_K3S_SH}
     $SUDO chown root:root ${KILLALL_K3S_SH}
@@ -647,12 +690,12 @@ set -x
 
 ${KILLALL_K3S_SH}
 
-if which systemctl; then
+if command -v systemctl; then
     systemctl disable ${SYSTEM_NAME}
     systemctl reset-failed ${SYSTEM_NAME}
     systemctl daemon-reload
 fi
-if which rc-update; then
+if command -v rc-update; then
     rc-update delete ${SYSTEM_NAME} default
 fi
 
@@ -686,6 +729,13 @@ rm -f ${KILLALL_K3S_SH}
 if type yum >/dev/null 2>&1; then
     yum remove -y k3s-selinux
     rm -f /etc/yum.repos.d/rancher-k3s-common*.repo
+elif type zypper >/dev/null 2>&1; then
+    uninstall_cmd="zypper remove -y k3s-selinux"
+    if [ "\${TRANSACTIONAL_UPDATE=false}" != "true" ] && [ -x /usr/sbin/transactional-update ]; then
+        uninstall_cmd="transactional-update --no-selfupdate -d run \$uninstall_cmd"
+    fi
+    \$uninstall_cmd
+    rm -f /etc/zypp/repos.d/rancher-k3s-common*.repo
 fi
 EOF
     $SUDO chmod 755 ${UNINSTALL_K3S_SH}
@@ -694,19 +744,18 @@ EOF
 
 # --- disable current service if loaded --
 systemd_disable() {
+    $SUDO systemctl disable ${SYSTEM_NAME} >/dev/null 2>&1 || true
     $SUDO rm -f /etc/systemd/system/${SERVICE_K3S} || true
     $SUDO rm -f /etc/systemd/system/${SERVICE_K3S}.env || true
-    $SUDO systemctl disable ${SYSTEM_NAME} >/dev/null 2>&1 || true
 }
 
 # --- capture current env and create file containing k3s_ variables ---
 create_env_file() {
     info "env: Creating environment file ${FILE_K3S_ENV}"
-    UMASK=$(umask)
-    umask 0377
-    env | grep '^K3S_' | $SUDO tee ${FILE_K3S_ENV} >/dev/null
-    env | egrep -i '^(NO|HTTP|HTTPS)_PROXY' | $SUDO tee -a ${FILE_K3S_ENV} >/dev/null
-    umask $UMASK
+    $SUDO touch ${FILE_K3S_ENV}
+    $SUDO chmod 0600 ${FILE_K3S_ENV}
+    sh -c export | while read x v; do echo $v; done | grep -E '^(K3S|CONTAINERD)_' | $SUDO tee ${FILE_K3S_ENV} >/dev/null
+    sh -c export | while read x v; do echo $v; done | grep -Ei '^(NO|HTTP|HTTPS)_PROXY' | $SUDO tee -a ${FILE_K3S_ENV} >/dev/null
 }
 
 # --- write systemd service file ---
@@ -724,7 +773,9 @@ WantedBy=multi-user.target
 
 [Service]
 Type=${SYSTEMD_TYPE}
-EnvironmentFile=${FILE_K3S_ENV}
+EnvironmentFile=-/etc/default/%N
+EnvironmentFile=-/etc/sysconfig/%N
+EnvironmentFile=-${FILE_K3S_ENV}
 KillMode=process
 Delegate=yes
 # Having non-zero Limit*s causes performance problems due to accounting overhead
@@ -736,6 +787,7 @@ TasksMax=infinity
 TimeoutStartSec=0
 Restart=always
 RestartSec=5s
+ExecStartPre=/bin/sh -xc '! /usr/bin/systemctl is-enabled --quiet nm-cloud-setup.service'
 ExecStartPre=-/sbin/modprobe br_netfilter
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=${BIN_DIR}/k3s \\
@@ -827,6 +879,11 @@ openrc_start() {
 
 # --- startup systemd or openrc service ---
 service_enable_and_start() {
+    if [ -f "/proc/cgroups" ] && [ "$(grep memory /proc/cgroups | while read -r n n n enabled; do echo $enabled; done)" -eq 0 ];
+    then
+        info 'Failed to find memory cgroup, you may need to add "cgroup_memory=1 cgroup_enable=memory" to your linux cmdline (/boot/cmdline.txt on a Raspberry Pi)'
+    fi
+
     [ "${INSTALL_K3S_SKIP_ENABLE}" = true ] && return
 
     [ "${HAS_SYSTEMD}" = true ] && systemd_enable
@@ -835,7 +892,7 @@ service_enable_and_start() {
     [ "${INSTALL_K3S_SKIP_START}" = true ] && return
 
     POST_INSTALL_HASHES=$(get_installed_hashes)
-    if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ]; then
+    if [ "${PRE_INSTALL_HASHES}" = "${POST_INSTALL_HASHES}" ] && [ "${INSTALL_K3S_FORCE_RESTART}" != true ]; then
         info 'No change detected so skipping service start'
         return
     fi
