@@ -71,6 +71,8 @@ rsync -axHAWX --numeric-ids --verbose bootmnt/ ${BASEDIR}/media/rpi/sage-utils/d
 rsync -axHAWX --numeric-ids --verbose rootmnt/ ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs
 # remove the etc/resolv.conf symlink to be replaced by our custom file
 rm ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/resolv.conf
+# remove the rsyslog configuration, as we are not using rsyslog
+rm ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/rsyslog.d/*
 
 cp -pr ROOTFS/* ${BASEDIR}/
 zcat ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinuz > ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinux

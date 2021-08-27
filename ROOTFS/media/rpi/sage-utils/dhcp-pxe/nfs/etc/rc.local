@@ -7,6 +7,13 @@ SDPARTDIR="/dev/mmcblk0p3"
 
 echo "Waggle customizations - start" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` > /etc/rc.local.logs
 
+# disable rsyslog since we have journald
+echo "Disable ryslog logging" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+systemctl stop syslog.socket
+systemctl stop rsyslog.service
+systemctl stop logrotate.timer
+systemctl stop logrotate.service
+
 if [ -b "$SDDIR" ]; then
   echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   mkdir -p /media/plugin-data/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
