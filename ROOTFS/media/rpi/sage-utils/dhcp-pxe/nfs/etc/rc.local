@@ -14,6 +14,14 @@ systemctl stop rsyslog.service
 systemctl stop logrotate.timer
 systemctl stop logrotate.service
 
+# disable unnecessary timers
+echo "Disable unnecessary timers" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+systemctl stop fwupd-refresh.timer
+systemctl stop apt-daily.timer
+systemctl stop apt-daily-upgrade.timer
+systemctl stop motd-news.timer
+systemctl stop man-db.timer
+
 if [ -b "$SDDIR" ]; then
   echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   mkdir -p /media/plugin-data/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
