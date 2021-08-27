@@ -5,8 +5,10 @@
 SDDIR="/dev/mmcblk0"
 SDPARTDIR="/dev/mmcblk0p3"
 
+echo "Waggle customizations - start" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` > /etc/rc.local.logs
+
 if [ -b "$SDDIR" ]; then
-  echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` > /etc/rc.local.logs
+  echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   mkdir -p /media/plugin-data/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   if [ ! -b "$SDPARTDIR" ]; then
     echo "Initializing Partition Table on SD Card" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
@@ -54,3 +56,5 @@ ln -s /media/plugin-data/k3s/etc/rancher/ /etc/rancher
 ln -s /media/plugin-data/k3s/kubelet/ /var/lib/kubelet
 ln -s /media/plugin-data/k3s/rancher/ /var/lib/rancher
 K3S_URL=https://10.31.81.1:6443 K3S_TOKEN=4tX0DUZ0uQknRtVUAKjt K3S_NODE_NAME=$MACFULL.$hostname INSTALL_K3S_SKIP_DOWNLOAD=true /etc/installK3S.sh | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+
+echo "Waggle customizations - done" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
