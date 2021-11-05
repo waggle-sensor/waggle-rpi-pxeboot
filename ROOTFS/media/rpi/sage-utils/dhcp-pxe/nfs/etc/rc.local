@@ -22,6 +22,10 @@ systemctl stop apt-daily-upgrade.timer
 systemctl stop motd-news.timer
 systemctl stop man-db.timer
 
+echo "Disable snapd" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+systemctl mask snapd.service
+systemctl stop snapd.service
+
 if [ -b "$SDDIR" ]; then
   echo "SD Card found continuing..." | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
   mkdir -p /media/plugin-data/ | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
