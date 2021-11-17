@@ -71,6 +71,7 @@ umount /mnt/mnt
 umount /mnt/proc
 umount -l -f /mnt/dev
 umount -l -f /mnt
+umount /ro
 # continue with regular init
 exec /sbin/init
 END
