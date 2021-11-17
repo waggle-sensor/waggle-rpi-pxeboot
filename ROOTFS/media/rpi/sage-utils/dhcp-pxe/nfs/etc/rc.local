@@ -63,6 +63,10 @@ fi
 dpkg -i /isodebs/*
 echo "Packages In /isodebs/ Installed" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 
+#Enable custom services
+echo "Enable custom services" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+systemctl enable waggle-k3s-shutdown
+
 MACLower=$(sed s/://g /sys/class/net/eth0/address)
 MAC=${MACLower^^}
 MACFULL=$(printf "0000%5s\n" "$MAC")
