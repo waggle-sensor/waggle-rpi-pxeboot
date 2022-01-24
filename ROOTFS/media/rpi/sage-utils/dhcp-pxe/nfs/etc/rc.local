@@ -72,12 +72,18 @@ MAC=${MACLower^^}
 MACFULL=$(printf "0000%5s\n" "$MAC")
 hostname=$(cat /etc/hostname)
 
+echo "Prepare k3s environment" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 mkdir -p /media/plugin-data/k3s/etc/rancher/
 mkdir -p /media/plugin-data/k3s/kubelet
 mkdir -p /media/plugin-data/k3s/rancher
 ln -s /media/plugin-data/k3s/etc/rancher/ /etc/rancher
 ln -s /media/plugin-data/k3s/kubelet/ /var/lib/kubelet
 ln -s /media/plugin-data/k3s/rancher/ /var/lib/rancher
+# copy over the custom k3s registry config
+mkdir -p /etc/rancher/k3s/
+cp /etc/waggle/k3s/registries.yaml /etc/rancher/k3s/
+
+# download and start k3s
 K3S_URL=https://10.31.81.1:6443 K3S_TOKEN=4tX0DUZ0uQknRtVUAKjt K3S_NODE_NAME=$MACFULL.$hostname INSTALL_K3S_SKIP_DOWNLOAD=true /etc/installK3S.sh | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 
 echo "Waggle customizations - done" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
