@@ -2,3 +2,6 @@ mirrors:
   docker.io:
     endpoint:
       - "http://10.31.81.1:5001"
+  registry.sagecontinuum.org:
+    endpoint:
+      - "http://10.31.81.1:5002"
