@@ -5,3 +5,10 @@ mirrors:
   registry.sagecontinuum.org:
     endpoint:
       - "http://10.31.81.1:5002"
+  "10.31.81.1:5000":
+    endpoint:
+      - "https://10.31.81.1:5000"
+configs:
+  "10.31.81.1:5000":
+    tls:
+      cert_file: /etc/docker/certs.d/10.31.81.1:5000/domain.crt
