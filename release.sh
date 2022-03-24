@@ -82,7 +82,7 @@ chmod 600 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/ssh/ssh_host_ecdsa_ke
 
 chmod 644 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/docker/certs.d/10.31.81.1:5000/domain.crt
 
-wget https://github.com/rancher/k3s/releases/download/v1.20.15+k3s1/k3s-arm64
+wget https://github.com/rancher/k3s/releases/download/v1.21.10+k3s1/k3s-arm64
 chmod +x k3s-arm64
 mv k3s-arm64 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/usr/local/bin/k3s
 

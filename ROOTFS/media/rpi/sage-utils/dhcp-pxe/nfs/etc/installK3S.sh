@@ -442,7 +442,7 @@ setup_binary() {
 
 # --- setup selinux policy ---
 setup_selinux() {
-    case ${INSTALL_K3S_CHANNEL} in
+    case ${INSTALL_K3S_CHANNEL} in 
         *testing)
             rpm_channel=testing
             ;;
