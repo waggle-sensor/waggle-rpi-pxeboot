@@ -46,6 +46,7 @@ mkdir -p /tmp/reg
 
 # Build the pxe-boot debian package
 BASEDIR=/tmp/reg
+# note: leaving 'sage' in Debian package name to ensure backward compatibility
 NAME=sage-rpi-pxeboot
 ARCH=all
 
@@ -53,7 +54,7 @@ mkdir -p ${BASEDIR}/DEBIAN
 cat > ${BASEDIR}/DEBIAN/control <<EOL
 Package: ${NAME}
 Version: ${VERSION_LONG}
-Maintainer: sagecontinuum.org
+Maintainer: waggle-edge.ai
 Description: Start DHCP container that allows for PXE booting from RPI
 Architecture: ${ARCH}
 Priority: optional
