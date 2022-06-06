@@ -95,4 +95,5 @@ find * -type f -not -path 'DEBIAN/*' -exec md5sum {} \; > DEBIAN/md5sums
 popd
 
 dpkg-deb --root-owner-group --build ${BASEDIR} "${NAME}_${VERSION_SHORT}_${ARCH}.deb"
-mv *.deb /output/
+mkdir -p /repo/output/
+mv *.deb /repo/output/

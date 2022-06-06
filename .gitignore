@@ -1,2 +1,4 @@
 *.DS_Store
-*.deb
+output/
+__pycache__/
+*.pyc
