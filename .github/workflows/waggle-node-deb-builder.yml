@@ -1,0 +1,28 @@
+name: Waggle Node Debian Package Builder CI
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["*"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: setup environment
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+      - name: Build deb
+        run: ./build.sh
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: output/*
