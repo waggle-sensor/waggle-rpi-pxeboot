@@ -38,4 +38,5 @@ ADD ROOTFS /ROOTFS/
 COPY --from=deb_container /isodebs/* /ROOTFS/media/rpi/sage-utils/dhcp-pxe/nfs/isodebs/
 COPY --from=deb_container /ROOTFS/media/rpi/sage-utils/dhcp-pxe/bme680-overlay.dtbo /ROOTFS/media/rpi/sage-utils/dhcp-pxe/tftp/overlays/
 
-COPY release.sh .
+COPY release.sh /release.sh
+ENTRYPOINT [ "/release.sh" ]
