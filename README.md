@@ -2,6 +2,8 @@
 
 Creates Debian Package that set's up DHCP, NFS, and TFTP service on NX to allow for PXE booting a RPI4. Build's out RPI overlay rootfs and boot files inside package.
 
+The produced Debian package is used by [wildnode-image](https://github.com/waggle-sensor/wildnode-image) to produce the Wild Waggle Node NX Build.
+
 ## Usage (how to build the rpi-pxeboot deb package)
 
 To build a version of this debian package simply run the build.sh script:
