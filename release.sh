@@ -81,7 +81,7 @@ zcat ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/vmlinuz > ${BASEDIR}/media/rp
 chmod 755 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/tftp/overlays/bme680-overlay.dtbo
 chmod 600 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/ssh/ssh_host_ecdsa_key
 
-chmod 644 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/docker/certs.d/10.31.81.1:5000/domain.crt
+chmod 644 ${BASEDIR}/media/rpi/sage-utils/dhcp-pxe/nfs/etc/waggle/docker/certs/domain.crt
 
 wget https://github.com/rancher/k3s/releases/download/v1.20.2+k3s1/k3s-arm64
 chmod +x k3s-arm64
