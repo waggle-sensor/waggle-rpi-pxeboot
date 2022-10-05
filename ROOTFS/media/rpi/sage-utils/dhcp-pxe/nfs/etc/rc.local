@@ -72,6 +72,13 @@ MAC=${MACLower^^}
 MACFULL=$(printf "0000%5s\n" "$MAC")
 hostname=$(cat /etc/hostname)
 
+echo "Configure local Docker registery access" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+mkdir -p /etc/docker/certs.d/10.31.81.1\:5000/
+cp /etc/waggle/docker/certs/domain.crt /etc/docker/certs.d/10.31.81.1\:5000/
+mkdir -p /usr/local/share/ca-certificates
+cp /etc/waggle/docker/certs/domain.crt /usr/local/share/ca-certificates/docker.crt
+update-ca-certificates
+
 echo "Prepare k3s environment" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 mkdir -p /media/plugin-data/k3s/etc/rancher/
 mkdir -p /media/plugin-data/k3s/kubelet
