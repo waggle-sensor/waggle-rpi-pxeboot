@@ -15,8 +15,8 @@ ARG REQ_PACKAGES
 RUN mkdir -p /isodebs/
 RUN cd /isodebs/ && apt-get update && apt-get download -y $REQ_PACKAGES
 
-ADD ROOTFS /ROOTFS/
-RUN cd /ROOTFS/media/rpi/sage-utils/dhcp-pxe/ && dtc -O dtb -o bme680-overlay.dtbo -b 0 -@ bme680-overlay.dts
+ADD build /build/
+RUN cd /build/ && dtc -O dtb -o bme680-overlay.dtbo -b 0 -@ bme680-overlay.dts
 
 FROM ubuntu:18.04
 
@@ -36,7 +36,7 @@ ADD deb /deb/
 ADD ROOTFS /ROOTFS/
 
 COPY --from=deb_container /isodebs/* /ROOTFS/media/rpi/sage-utils/dhcp-pxe/nfs/isodebs/
-COPY --from=deb_container /ROOTFS/media/rpi/sage-utils/dhcp-pxe/bme680-overlay.dtbo /ROOTFS/media/rpi/sage-utils/dhcp-pxe/tftp/overlays/
+COPY --from=deb_container /build/bme680-overlay.dtbo /ROOTFS/media/rpi/sage-utils/dhcp-pxe/tftp/overlays/
 
 COPY release.sh /release.sh
 ENTRYPOINT [ "/release.sh" ]
