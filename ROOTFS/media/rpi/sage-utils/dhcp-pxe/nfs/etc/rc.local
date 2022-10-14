@@ -47,17 +47,13 @@ if [ -b "$SDDIR" ]; then
 
     mkfs -t ext4 /dev/mmcblk0p3 >> /etc/rc.local.logs
   fi
-
-  echo "Preforming check on 3rd partition on SD" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-  fsck -a /dev/mmcblk0p3 | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-
-  echo "Mounting SD CARD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-  mount /dev/mmcblk0p3 /media/plugin-data | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
-  cat /etc/rc.local.logs >> /media/plugin-data/sdmount.log
-
 else
   echo "Error: SD CARD not found will continue without SD Scratch Space" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 fi
+
+#Switch journal to the SD card
+echo "Create journal logging path on the SD card" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
+mkdir -p /media/plugin-data/var/log/journal
 
 #Installing all packages from /isodebs/
 dpkg -i /isodebs/*
@@ -93,4 +89,5 @@ cp /etc/waggle/k3s/registries.yaml /etc/rancher/k3s/
 # download and start k3s
 K3S_URL=https://10.31.81.1:6443 K3S_TOKEN=4tX0DUZ0uQknRtVUAKjt K3S_NODE_NAME=$MACFULL.$hostname INSTALL_K3S_SKIP_DOWNLOAD=true /etc/installK3S.sh | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs
 
+cat /etc/rc.local.logs >> /media/plugin-data/sdmount.log
 echo "Waggle customizations - done" | xargs -L 1 echo `date +'[%Y-%m-%d %H:%M:%S]'` >> /etc/rc.local.logs

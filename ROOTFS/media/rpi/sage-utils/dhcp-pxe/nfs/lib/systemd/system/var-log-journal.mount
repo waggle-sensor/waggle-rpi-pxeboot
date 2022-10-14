@@ -1,0 +1,11 @@
+[Unit]
+Description=Persistent Journal Storage Bind
+
+[Mount]
+What=/media/plugin-data/var/log/journal
+Where=/var/log/journal
+Type=none
+Options=bind
+
+[Install]
+WantedBy=local-fs.target

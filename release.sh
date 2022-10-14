@@ -90,6 +90,9 @@ rm ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/resolv.conf
 # remove the rsyslog configuration, as we are not using rsyslog
 rm ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/rsyslog.d/*
 
+# remove the journal file to encourage journald to log to volatile space, for eventual moving to SD card
+rm ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/var/log/journal
+
 cp -pr ROOTFS/* ${BASEDIR}/
 zcat ${BASEDIR}/${MEDIA_RPI_PATH}/tftp/vmlinuz > ${BASEDIR}/${MEDIA_RPI_PATH}/tftp/vmlinux
 

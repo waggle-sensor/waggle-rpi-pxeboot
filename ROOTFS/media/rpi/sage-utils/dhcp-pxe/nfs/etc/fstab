@@ -1,1 +1,2 @@
 10.31.81.1:/media/rpi/sage-utils/dhcp-pxe/tftp /boot nfs defaults,vers=3 0 0
+/dev/mmcblk0p3 /media/plugin-data ext4 defaults,nofail,x-systemd.after=local-fs-pre.target,x-systemd.before=local-fs.target 0 2
