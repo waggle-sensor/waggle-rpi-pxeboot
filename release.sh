@@ -98,9 +98,12 @@ chmod 600 ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/ssh/ssh_host_ecdsa_key
 
 chmod 644 ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/waggle/docker/certs/domain.crt
 
-wget https://github.com/rancher/k3s/releases/download/v1.20.2+k3s1/k3s-arm64
+wget https://github.com/k3s-io/k3s/releases/download/v1.25.4%2Bk3s1/k3s-arm64
 chmod +x k3s-arm64
 mv k3s-arm64 ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/usr/local/bin/k3s
+
+curl -sfL https://get.k3s.io > ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/installK3S.sh
+chmod +x ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/installK3S.sh
 
 echo "${VERSION_LONG}" > ${BASEDIR}/${MEDIA_RPI_PATH}/version
 

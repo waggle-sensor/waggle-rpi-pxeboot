@@ -21,6 +21,7 @@ RUN cd /build/ && dtc -O dtb -o bme680-overlay.dtbo -b 0 -@ bme680-overlay.dts
 FROM ubuntu:18.04
 
 RUN apt-get update -y && apt-get install -y \
+    curl \
     git \
     kpartx \
     wget \
