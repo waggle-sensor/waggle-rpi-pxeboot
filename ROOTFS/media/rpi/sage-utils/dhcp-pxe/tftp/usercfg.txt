@@ -1,0 +1,14 @@
+# Place "config.txt" changes (dtparam, dtoverlay, disable_overscan, etc.) in
+# this file. Please refer to the README file for a description of the various
+# configuration files on the boot partition.
+
+[pi4]
+# boot from vmlinux instead of u-boot
+kernel=vmlinux
+initramfs initrd.img followkernel
+
+# enable bme680 sysfs sensor support
+dtoverlay=bme680-overlay
+
+# disable overscan when debugging with a monitor
+disable_overscan=1
