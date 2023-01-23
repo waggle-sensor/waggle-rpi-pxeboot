@@ -72,12 +72,19 @@ DEB_OUT=/repo/output/
 
 mkdir -p ${BASEDIR}
 
-echo "Copying Over RPI Filesystem and DHCP/NFS config files"
+echo "Load base RPI filesystem"
 mkdir -p ${BASEDIR}/${MEDIA_RPI_PATH}/tftp/
 mkdir -p ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/
 
 rsync -axHAWX --numeric-ids --verbose bootmnt/ ${BASEDIR}/${MEDIA_RPI_PATH}/tftp
 rsync -axHAWX --numeric-ids --verbose rootmnt/ ${BASEDIR}/${MEDIA_RPI_PATH}/nfs
+
+echo "Update bootloader files"
+rsync -av /rpi_fw/boot/bootcode.bin ${BASEDIR}/${MEDIA_RPI_PATH}/tftp
+rsync -av /rpi_fw/boot/fixup*dat ${BASEDIR}/${MEDIA_RPI_PATH}/tftp
+rsync -av /rpi_fw/boot/start*elf ${BASEDIR}/${MEDIA_RPI_PATH}/tftp
+
+echo "Make custom changes to the RPI filesystem (i.e. DHCP/NFS config files)"
 # remove the etc/resolv.conf symlink to be replaced by our custom file
 rm ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/etc/resolv.conf
 # remove the rsyslog configuration, as we are not using rsyslog
@@ -96,7 +103,6 @@ chmod +x k3s-arm64
 mv k3s-arm64 ${BASEDIR}/${MEDIA_RPI_PATH}/nfs/usr/local/bin/k3s
 
 echo "${VERSION_LONG}" > ${BASEDIR}/${MEDIA_RPI_PATH}/version
-echo "Done Copying RPI Filesystem and DHCP/NFS config files"
 
 # Break-up the debian package into smaller pieces to ease installation in a Docker environment
 BASEDIR_TMP=/tmp/split
