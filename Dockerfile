@@ -21,15 +21,25 @@ RUN cd /build/ && dtc -O dtb -o bme680-overlay.dtbo -b 0 -@ bme680-overlay.dts
 FROM ubuntu:18.04
 
 RUN apt-get update -y && apt-get install -y \
+    git \
     kpartx \
     wget \
     zip  \
     xz-utils \
     rsync
 
+# core OS files
 RUN wget https://old-releases.ubuntu.com/releases/20.04.2/ubuntu-20.04.2-preinstalled-server-arm64+raspi.img.xz
 RUN unxz --test *.xz
 RUN unxz --verbose *.xz
+
+# more up-to-date bootloader files - used for bootloader firmware files only
+# lets do this instead and pull in the files we want https://github.com/raspberrypi/firmware/releases/tag/1.20230106
+ENV FW_REPO=https://github.com/raspberrypi/firmware
+ENV FW_VERSION=1.20230106
+RUN git clone --depth 1 ${FW_REPO} -b ${FW_VERSION} /rpi_fw ; \
+    cd /rpi_fw ; \
+    rm -rf .git
 
 RUN mkdir -p /deb/ /ROOTFS/
 ADD deb /deb/
