@@ -47,5 +47,5 @@ As a flurry of messages should pass containing the word .nfs, what's happening i
 
 ## References
 
-- https://github.com/waggle-sensor/RPI_PxE_Flash_SD - How to flash the RPi SDcard to enable PxE booting
+- https://github.com/waggle-sensor/waggle-rpi-sd-flash - How to create and flash the RPi SD card image to enable net PxE booting
 - https://blockdev.io/read-only-rpi/ - Note about this reference, it contains many unneccesary time-consuming steps but was very helpful nonetheless.
